@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use FindBin;
+use lib $FindBin::Bin;
+use PollProxy;
+use LWP::UserAgent;
+use JSON;
+
+if (my $html_file = $ARGV[0]) {
+    open (H, '<'.$html_file) or die $!;
+    local $/; # slurp
+    my $content = <H>;
+    close H;
+    my $added = PollProxy::populate_proxies($content);
+    print "$added proxies added.\n";
+    exit;
+}
+
+sub get_cfg;
+
+my $cfg = get_cfg 'pollproxy.cfg';
+my $proxyUrl = $cfg->{url};
+my $ua = LWP::UserAgent->new;
+my $res = PollProxy::fetch($ua, $proxyUrl);
+until ($res->is_success) {
+    if ($res->status_line =~ /^404/) {
+	PollProxy::markBad("POPULATE FAIL " . $res->status_line);
+	$PollProxy::CURRENT_PROXY = undef;
+	@PollProxy::PROXY_LIST = ();
+	$res = PollProxy::fetch($ua, $proxyUrl);
+    } else {
+	die $res->status_line;
+    }
+}
+my $content = $res->content;
+my $added = PollProxy::populate_proxies($content);
+print "$added proxies added.\n";
+
+sub get_cfg {
+    my $item = shift;
+    open (I, '<'.$FindBin::Bin.'/'.$item) or die $!;
+    local $/;
+    my $json_text = <I>;
+    close I;
+    my $json = new JSON;
+    return $json->decode($json_text);
+}
