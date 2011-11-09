@@ -29,7 +29,7 @@ print qq|Content-type: text/html
 
 <!DOCTYPE html>
 <html>
-<head><title>Proxees</title>/head>
+<head><title>Proxees</title></head>
 <body>
 $o
 </body>
