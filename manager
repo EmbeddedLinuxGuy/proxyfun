@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib $FindBin::Bin;
+use PollProxy;
+
+my $o = qq|<table>
+|;
+my $dbh = DBI->connect ("DBI:CSV:f_dir=${PollProxy::DATADIR}") or
+	die "Cannot connect: $DBI::errstr";
+my $proxies = $dbh->selectall_arrayref("SELECT proxy,last,success,failure FROM proxy");
+
+$o .= join('',
+	   map {
+	       '<tr>'
+		   .join ('',
+			  map {
+			      "<td>$_</td>"
+			  } @$_ )
+		   ."</tr>\n"
+	   } @$proxies);
+
+$o .= "</table>\n";
+
+print qq|Content-type: text/html
+
+<!DOCTYPE html>
+<html>
+<head><title>Proxees</title>/head>
+<body>
+$o
+</body>
+</html>
+|;
