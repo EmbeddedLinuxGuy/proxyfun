@@ -23,7 +23,7 @@ use DBI;
 
 package PollProxy;
 
-$PollProxy::DATADIR = ${FindBin::Bin}."/proxydb";
+$PollProxy::DATADIR = ${FindBin::Bin}.'/../proxydb';
 (-d $PollProxy::DATADIR) or die "Could not find ${PollProxy::DATADIR}";
 
 sub process_content;
