@@ -193,6 +193,7 @@ sub process_content {
 }
 
 sub markGood {
+    return unless $PollProxy::CURRENT_PROXY;
     my $dbh = DBI->connect ("DBI:CSV:f_dir=${PollProxy::DATADIR}") or
 	die "Cannot connect: $DBI::errstr";
     print "Select\n";
